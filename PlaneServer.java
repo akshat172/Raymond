@@ -2,6 +2,9 @@ package Raymond;
 
 import java.io.*;
 import java.net.*;
+import java.util.EventObject;
+import java.util.Scanner;
+
 
 /**
  * Created by marci on 4/05/2018.
@@ -19,6 +22,7 @@ public class PlaneServer extends Thread{
     boolean using;
     boolean asked;
     Plane plane;
+    ThreadAnimation GUI;
 
    // Raymond.PlaneServer(Raymond.PlaneServer p, Socket s, Raymond.Tower t, int id){
      //   this.parent=p;
@@ -76,6 +80,9 @@ public class PlaneServer extends Thread{
            ServerSocket sSocket = new ServerSocket(serverPort, 100, InetAddress.getByName("localhost"));
            plane.printMessage("Server Init");
            System.out.println(sSocket.getLocalSocketAddress().toString());
+           if(plane.hasToken){
+               this.enterRunway();
+           }
            while(waiting) {
                Socket s = sSocket.accept();
                System.out.println(s.getRemoteSocketAddress().toString());
@@ -84,11 +91,11 @@ public class PlaneServer extends Thread{
                InputStream in = s.getInputStream();
                DataInputStream is = new DataInputStream(s.getInputStream());
                BufferedInputStream input = new BufferedInputStream(is);
-               String testMessage = "Received";
-               out.write(testMessage.getBytes(), 0, testMessage.length());
                ObjectInputStream objectInputStream = new ObjectInputStream(input);
                Object object = objectInputStream.readObject();
                Message mesg = Message.class.cast(object);
+               String testMessage = "Received";
+               out.write(testMessage.getBytes(), 0, testMessage.length());
                //processMess
                s.close();
                processMessage(mesg);//Seperate thread
@@ -108,6 +115,7 @@ public class PlaneServer extends Thread{
        catch (IOException e){
            plane.printMessage("In Server");
            plane.printMessage(e.toString());
+           e.printStackTrace();
        }
        catch (ClassNotFoundException e){
            System.out.println(e);
@@ -115,7 +123,7 @@ public class PlaneServer extends Thread{
     }
     public void processMessage(Message o) throws IOException{
         plane.printMessage("Mesg; "+o.forwarded);
-        if(o.isRequest() & !plane.hasToken){
+        if(o.isRequest() && !plane.hasToken){
             plane.printMessage("Request forwarded");
             //forward request to holder;
             o.forward(this.id);
@@ -133,18 +141,23 @@ public class PlaneServer extends Thread{
 //            mySocket.close();
             //Forward request
         }
-        if(o.isRequest() & plane.hasToken){
+        if(o.isRequest() && plane.hasToken  ){
             plane.printMessage("Token requested");
+            //Check if using
+
+
             //Send privillege to from
             Message tokenMessage=new Message(false,true,"localhost",this.id);
             tokenMessage.setForwarded(o.forwarded);
             this.holder=o.dequeue();
             plane.holder=this.holder;
             plane.hasToken=false;
+            //this.GUI.dispatchEvent(new WindowEvent(this.GUI, WindowEvent.WINDOW_CLOSING));
+            this.GUI.close();
             sendMessage(tokenMessage,this.holder);
             //Update holder to from/
         }
-        if(o.isToken() & !plane.asked){
+        if(o.isToken() && !plane.asked){
             plane.printMessage("Token forwarded");
             this.holder=o.dequeue();
             plane.holder=this.holder;
@@ -154,11 +167,21 @@ public class PlaneServer extends Thread{
             //Update holder
             //this.holder=o.getFromID();
         }
-        if(o.isToken() && plane.asked && o.forwarded.isEmpty()){
-            plane.printMessage("Token accepted");
-            plane.asked=false;
-            plane.hasToken=true;
-            enterRunway();
+        if(o.isToken() && plane.asked ){
+            if (o.forwarded.isEmpty()) {
+                plane.printMessage("Token accepted");
+                //this.holder = o.dequeue();
+                //plane.holder = this.holder;
+                plane.asked = false;
+                plane.hasToken = true;
+                enterRunway();
+            }
+            else{
+                plane.printMessage("Token forwarded");
+                this.holder=o.dequeue();
+                plane.holder=this.holder;
+                sendMessage(o,this.holder);
+            }
             //Enter CS
         }
 
@@ -186,10 +209,23 @@ public class PlaneServer extends Thread{
     }
     public void enterRunway(){
         plane.printMessage("Entered runway");
-
+        plane.using=true;
+        Scanner reader = new Scanner(System.in);  // Reading from System.in
+        plane.printMessage("Enter a number to enter runway");
+        int n = reader.nextInt(); // Scans the next token of the input as an int.
+        //Create graphic
+        this.GUI=new ThreadAnimation();
+        this.GUI.animate();
+        plane.printMessage("Enter a number to exit runway");
+         n = reader.nextInt();
+         this.exitRunway();
+        //String[] args=new String[1];
+        //GUI.main(args);
     }
     public void exitRunway(){
+
         plane.landed=true;
+        plane.using=false;
     }
     //Get request
 

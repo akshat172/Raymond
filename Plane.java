@@ -24,6 +24,11 @@ public class Plane {
 //    public updateHolder(int h){
 ////        pass;
 ////    }
-
+    public  synchronized void enterRunway(){
+        this.using=true;
+    }
+    public  synchronized void exitRunway(){
+        this.using=false;
+    }
     }
 

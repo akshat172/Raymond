@@ -3,6 +3,8 @@ package Raymond;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Created by marci on 6/05/2018.
@@ -27,7 +29,7 @@ public class Node {
 
     public static void main(String[] args) throws IOException {
         int id = Integer.parseInt(args[0]);
-
+        ArrayList<PlaneClient> clients=new ArrayList<PlaneClient>();
         int holder=0;
         String hold="Holder_config";
         String lineh = null;
@@ -52,12 +54,18 @@ public class Node {
             String[] l = line.split(",");
             if (Integer.parseInt(l[0]) == id) {
                 PlaneClient cPlane = new PlaneClient(Integer.parseInt(l[1]), p,id);
-                cPlane.start();
-
+                clients.add(cPlane);
             }
         }
-
         sPlane.start();
+        Scanner reader = new Scanner(System.in);  // Reading from System.in
+        p.printMessage("Enter a number to start the clients");
+        int n = reader.nextInt(); // Scans the next token of the input as an int.
+        for (PlaneClient client: clients) {
+            client.start();
+        }
+        }
+
             //System.out.println("Server started");
             //cPlane.start();
             //for (int i=0;i<;)
@@ -65,7 +73,7 @@ public class Node {
 
 
 
-    }
+
 
     public int getPort() {
         return port;

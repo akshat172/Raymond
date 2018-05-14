@@ -42,8 +42,7 @@ public class PlaneClient extends Thread {
             byte[] buffer = new byte[128];
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             boolean r=true;
-            Scanner reader = new Scanner(System.in);  // Reading from System.in
-            int n = reader.nextInt(); // Scans the next token of the input as an int.
+
             //reader.close();
             plane.printMessage("Client Init");
             //while(r) {
@@ -53,32 +52,35 @@ public class PlaneClient extends Thread {
             //InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("localhost"),Integer.parseInt(args[1]));
 
             plane.printMessage("Started");
-            Socket mySocket = new Socket();
             //Send request for CS
             while(r) {
                 Thread.sleep(4000);
-                if(!plane.landed && !plane.asked) {
-                    //Check critcal section
-                    //if has token and cs empty
-                    //elif has token and cs not empty
-                    //error
-                    //elif no token
-                    if(this.holder== plane.holder && this.holder!=this.id ) {
-                        plane.printMessage("Check");
-                        InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("localhost"), 1000+this.holder);
-                        mySocket.connect(targetAddress);
-                        DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
-                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
-                        Message m = new Message(true, false, "localhost", this.id);
-                        objectOutputStream.writeObject(m);
-                        objectOutputStream.flush();
-                        plane.asked = true;
-                    }
+                //if(!plane.landed && !plane.asked) {
+                if( !plane.asked) {
 
+                        //Check critcal section
+                        //if has token and cs empty
+                        //elif has token and cs not empty
+                        //error
+                        //elif no token
+                        if(this.holder== plane.holder && this.holder!=this.id ) {
+                            Socket mySocket = new Socket();
+                            plane.printMessage("Check");
+                            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("localhost"), 1000+this.holder);
+                            mySocket.connect(targetAddress);
+                            DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
+                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
+                            Message m = new Message(true, false, "localhost", this.id);
+                            objectOutputStream.writeObject(m);
+                            objectOutputStream.flush();
+                            plane.asked = true;
+                            mySocket.close();
+                        }
+
+                    }
                 }
 
-            }
-            mySocket.close();
+            //mySocket.close();
 //            InputStream stream = mySocket.getInputStream();
 //            stream.read(buffer, 0, 128);
 //            System.out.println(new String(buffer));
