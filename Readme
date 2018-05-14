@@ -1,0 +1,7 @@
+To start the appliction: 
+  1. Define config files for the tree and the initial holder values
+  1a. Tree config consists of integer pairs separated by a comma
+  1b. Format: a,b represents a directed edge between node a and b 
+  2. Run a seperate instance of the program for each node, reading in the config file for each.
+  2a. Program arguements are as follows: first the id of the node, and then the initial node with the token(must be the same for each node)
+  
