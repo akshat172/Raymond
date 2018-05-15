@@ -1,14 +1,12 @@
-package Raymond;
-
 import java.io.*;
 import java.net.*;
-import java.util.EventObject;
 import java.util.Scanner;
 
 
 /**
  * Created by marci on 4/05/2018.
  */
+//Planeserver class processes incoming messages and respond accordingly
 public class PlaneServer extends Thread{
     //private PlaneServer parent;
     //private Socket parentSocket;
@@ -30,11 +28,14 @@ public class PlaneServer extends Thread{
     //    this.tower=t;
     //    this.id=id;
    // }
+
+    //Constructor
    PlaneServer(int s,Plane p) {
        this.id=s;
        this.serverPort=1000+s;
        this.plane=p;
        this.holder=p.holder;
+
    }
     public static void main(String[] args) throws IOException {
         //int serverPort=Integer.parseInt(args[0]);
@@ -43,41 +44,20 @@ public class PlaneServer extends Thread{
         //System.out.println(InetAddress.getByName("localhost"));
         //Socket mySocket=new Socket(InetAddress.getByName("localhost"),Integer.parseInt(args[0]));
 
-
         boolean r=true;
        // while (r) {
         //    int i=0;
        // }
     }
 
-    public void receiveMessage(){
 
-    }
-    public void receiveRequest(){
-
-    }
-    public void receivePrivillege(){
-
-    }
-    public void communicatewithServer(int serverPort) throws UnknownHostException, IOException{
-        Socket mySocket=new Socket();
-        byte[] buffer=new byte[128];
-        //InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("localhost"),Integer.parseInt(args[1]));
-        InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("localhost"),serverPort);
-        //  InetAddress LHAddress = mySocket.getLocalAddress();
-        //  int myPort = mySocket.getLocalPort();
-        // System.out.println("\nLocal Host:" + LHAddress + "\nLocal port:" + myPort);
-        mySocket.connect(targetAddress);
-        InputStream stream=mySocket.getInputStream();
-        stream.read(buffer,0,128);
-        System.out.println(new String(buffer));
-        mySocket.close();
-    }
+    //The plane waits for a message to it to co0me through, and then executes the appropriate action
     @Override
     public void run() {
        try {
            boolean waiting=true;
-           ServerSocket sSocket = new ServerSocket(serverPort, 100, InetAddress.getByName("localhost"));
+           ServerSocket sSocket = new ServerSocket(serverPort, 100, InetAddress.getByName(plane.getIP(this.id)));
+           //ServerSocket sSocket = new ServerSocket(serverPort, 100, InetAddress.getByName("h"+Integer.toString(this.id)));
            plane.printMessage("Server Init");
            System.out.println(sSocket.getLocalSocketAddress().toString());
            if(plane.hasToken){
@@ -98,7 +78,7 @@ public class PlaneServer extends Thread{
                out.write(testMessage.getBytes(), 0, testMessage.length());
                //processMess
                s.close();
-               processMessage(mesg);//Seperate thread
+               processMessage(mesg);
                System.out.println(object.toString());
              //  boolean r = true;
                int inputCount = 0;
@@ -121,13 +101,15 @@ public class PlaneServer extends Thread{
            System.out.println(e);
        }
     }
+    //Processing the incoming message
     public void processMessage(Message o) throws IOException{
-        plane.printMessage("Mesg; "+o.forwarded);
+        //plane.printMessage("Mesg; "+o.forwarded);
+        //Forwarding a request
         if(o.isRequest() && !plane.hasToken){
-            plane.printMessage("Request forwarded");
+            //plane.printMessage("Request forwarded");
             //forward request to holder;
             o.forward(this.id);
-            plane.printMessage("Mesgafter; "+o.forwarded);
+            //plane.printMessage("Mesgafter; "+o.forwarded);
             sendMessage(o,this.holder);
 //            Socket mySocket = new Socket();
 //            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("localhost"), 1000+holder);
@@ -141,11 +123,10 @@ public class PlaneServer extends Thread{
 //            mySocket.close();
             //Forward request
         }
+        //Sending the token to a requester
         if(o.isRequest() && plane.hasToken  ){
-            plane.printMessage("Token requested");
+            //plane.printMessage("Token requested");
             //Check if using
-
-
             //Send privillege to from
             Message tokenMessage=new Message(false,true,"localhost",this.id);
             tokenMessage.setForwarded(o.forwarded);
@@ -157,6 +138,7 @@ public class PlaneServer extends Thread{
             sendMessage(tokenMessage,this.holder);
             //Update holder to from/
         }
+        //Forwarding the token to it's requestor
         if(o.isToken() && !plane.asked){
             plane.printMessage("Token forwarded");
             this.holder=o.dequeue();
@@ -167,6 +149,7 @@ public class PlaneServer extends Thread{
             //Update holder
             //this.holder=o.getFromID();
         }
+        //Receiving a token
         if(o.isToken() && plane.asked ){
             if (o.forwarded.isEmpty()) {
                 plane.printMessage("Token accepted");
@@ -176,21 +159,23 @@ public class PlaneServer extends Thread{
                 plane.hasToken = true;
                 enterRunway();
             }
+            //If the token was not sent in reply to it's request
             else{
                 plane.printMessage("Token forwarded");
                 this.holder=o.dequeue();
                 plane.holder=this.holder;
                 sendMessage(o,this.holder);
             }
-            //Enter CS
         }
 
     }
+    //Sending a message to the requested plane
     public void sendMessage(Message o,int to){
         try {
             plane.printMessage("Sending to "+Integer.toString(to));
             Socket mySocket = new Socket();
-            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("localhost"), 1000+to);
+            //InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("h"+Integer.toString(to)), 1000+to);
+            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName(plane.getIP(to)), 1000+to);
             mySocket.connect(targetAddress);
             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
@@ -211,27 +196,52 @@ public class PlaneServer extends Thread{
         plane.printMessage("Entered runway");
         plane.using=true;
         Scanner reader = new Scanner(System.in);  // Reading from System.in
-        plane.printMessage("Enter a number to enter runway");
-        int n = reader.nextInt(); // Scans the next token of the input as an int.
+        //plane.printMessage("Enter a number to enter runway");
+        //int n = reader.nextInt(); // Scans the next token of the input as an int.
         //Create graphic
         this.GUI=new ThreadAnimation();
+        this.GUI.toFront();
+        this.GUI.setLocationRelativeTo(null);
         this.GUI.animate();
         plane.printMessage("Enter a number to exit runway");
-         n = reader.nextInt();
+        int n = reader.nextInt();
+
          this.exitRunway();
         //String[] args=new String[1];
         //GUI.main(args);
     }
+    //Leaving critical section
     public void exitRunway(){
 
         plane.landed=true;
         plane.using=false;
     }
-    //Get request
-
-    //Get privilege
 
 
+    //Deprecated
+    public void receiveMessage(){
+
+    }
+    public void receiveRequest(){
+
+    }
+    public void receivePrivillege(){
+
+    }
+    public void communicatewithServer(int serverPort) throws UnknownHostException, IOException{
+        Socket mySocket=new Socket();
+        byte[] buffer=new byte[128];
+        //InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("localhost"),Integer.parseInt(args[1]));
+        InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("h"+Integer.toString(this.id)),serverPort);
+        //  InetAddress LHAddress = mySocket.getLocalAddress();
+        //  int myPort = mySocket.getLocalPort();
+        // System.out.println("\nLocal Host:" + LHAddress + "\nLocal port:" + myPort);
+        mySocket.connect(targetAddress);
+        InputStream stream=mySocket.getInputStream();
+        stream.read(buffer,0,128);
+        System.out.println(new String(buffer));
+        mySocket.close();
+    }
 
 
 }

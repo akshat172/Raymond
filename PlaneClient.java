@@ -1,14 +1,13 @@
-package Raymond;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.*;
 
 /**
  * Created by marci on 6/05/2018.
  */
+
+//Planeclient class sends requests periodically to holder
 public class PlaneClient extends Thread {
     int holder;
     boolean using;
@@ -16,6 +15,7 @@ public class PlaneClient extends Thread {
     int id;
     Plane plane;
 
+    //Constructor
     PlaneClient(int h, Plane p,int i){
         this.holder=h;
         this.asked=false;
@@ -44,29 +44,25 @@ public class PlaneClient extends Thread {
             boolean r=true;
 
             //reader.close();
-            plane.printMessage("Client Init");
+            //plane.printMessage("Client Init");
             //while(r) {
             //  InetAddress LHAddress = mySocket.getLocalAddress();
             //  int myPort = mySocket.getLocalPort();
             // System.out.println("\nLocal Host:" + LHAddress + "\nLocal port:" + myPort);
             //InetSocketAddress targetAddress=new InetSocketAddress(InetAddress.getByName("localhost"),Integer.parseInt(args[1]));
 
-            plane.printMessage("Started");
+            //plane.printMessage("Started");
             //Send request for CS
             while(r) {
                 Thread.sleep(4000);
                 //if(!plane.landed && !plane.asked) {
+                //If the plane hasn't requested, send a request
                 if( !plane.asked) {
-
-                        //Check critcal section
-                        //if has token and cs empty
-                        //elif has token and cs not empty
-                        //error
-                        //elif no token
                         if(this.holder== plane.holder && this.holder!=this.id ) {
                             Socket mySocket = new Socket();
                             plane.printMessage("Check");
-                            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("localhost"), 1000+this.holder);
+                           // InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("h"+Integer.toString(this.holder)), 1000+this.holder);
+                            InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName(plane.getIP(this.holder)), 1000+this.holder);
                             mySocket.connect(targetAddress);
                             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
                             ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
@@ -103,6 +99,7 @@ public class PlaneClient extends Thread {
         }
     }
 
+    //Deprecated
     public void makeRequest(){
 
     }

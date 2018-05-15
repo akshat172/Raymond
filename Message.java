@@ -1,16 +1,21 @@
-package Raymond;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Created by marci on 6/05/2018.
+ * Created by Marcel on 6/05/2018.
  */
+//Message class, transfers information between nodes
 public class Message implements Serializable {
+
     boolean request;
     boolean token;
     String fromHost;
     int type;
+    int fromPort;
+    int fromID;
+    ArrayList<Integer> forwarded;
 
+    //getters, setters, and mutators
     public ArrayList<Integer> getForwarded() {
         return forwarded;
     }
@@ -19,7 +24,6 @@ public class Message implements Serializable {
         this.forwarded = forwarded;
     }
 
-    ArrayList<Integer> forwarded;
 
     public int getFromID() {
         return fromID;
@@ -29,8 +33,7 @@ public class Message implements Serializable {
         this.fromID = fromID;
     }
 
-    int fromPort;
-    int fromID;
+
 
     public void setRequest(boolean request) {
         this.request = request;
@@ -50,20 +53,6 @@ public class Message implements Serializable {
 
     public void setFromPort(int fromPort) {
         this.fromPort = fromPort;
-    }
-
-    Message(boolean r, boolean t, String h, int f){
-       // this.type=t;
-        this.fromPort=f;
-        this.request=r;
-        this.token=t;
-        this.fromHost=h;
-        this.forwarded=new ArrayList<Integer>();
-        this.forwarded.add(f);
-    }
-
-    public String toString(){
-        return Integer.toString(this.fromPort)+fromHost;
     }
 
     public boolean isRequest() {
@@ -89,6 +78,23 @@ public class Message implements Serializable {
     public void forward(int i){
         this.forwarded.add(i);
     }
+
+    //Constructor
+    Message(boolean r, boolean t, String h, int f){
+       // this.type=t;
+        this.fromPort=f;
+        this.request=r;
+        this.token=t;
+        this.fromHost=h;
+        this.forwarded=new ArrayList<Integer>();
+        this.forwarded.add(f);
+    }
+
+    public String toString(){
+        return Integer.toString(this.fromPort)+fromHost;
+    }
+
+  //Gets latest recipient of message
     public int dequeue(){
         int index=this.forwarded.size()-1;
         int i=this.forwarded.get(index);

@@ -1,5 +1,3 @@
-package Raymond;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,11 +25,13 @@ public class Node {
         this.neighbours = n;
     }
 
+    //Initialises the planes and sets up
     public static void main(String[] args) throws IOException {
         int id = Integer.parseInt(args[0]);
         ArrayList<PlaneClient> clients=new ArrayList<PlaneClient>();
         int holder=0;
-        String hold="Holder_config";
+       // String hold="Holder_config";
+        String hold=args[2];
         String lineh = null;
         FileReader fileReaderhold = new FileReader(hold);
         BufferedReader bufferedReaderh = new BufferedReader(fileReaderhold);
@@ -45,8 +45,18 @@ public class Node {
         if (id==Integer.parseInt(args[1])){
             p.hasToken=true;
         }
+        //String ipconfig="ipconfig";
+        String ipconfig=args[3];
+        FileReader ipreader=new FileReader(ipconfig);
+        BufferedReader bufferedip = new BufferedReader(ipreader);
+        String lineip;
+        while ((lineip= bufferedip.readLine()) != null) {
+            String[] l = lineip.split(",");
+            p.addIP(Integer.parseInt(l[0]),l[1]);
+        }
         PlaneServer sPlane = new PlaneServer(id, p);
-        String fileName = "configConnections.txt";
+        //String fileName = "configConnections";
+        String fileName=args[4];
         String line = null;
         FileReader fileReader = new FileReader(fileName);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -64,6 +74,7 @@ public class Node {
         for (PlaneClient client: clients) {
             client.start();
         }
+
         }
 
             //System.out.println("Server started");
@@ -75,6 +86,7 @@ public class Node {
 
 
 
+    //Deprecated
     public int getPort() {
         return port;
     }
