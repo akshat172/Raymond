@@ -65,8 +65,8 @@ public class PlaneServer extends Thread{
            }
            while(waiting) {
                Socket s = sSocket.accept();
-               System.out.println(s.getRemoteSocketAddress().toString());
-               System.out.println(s.getLocalSocketAddress().toString());
+               //System.out.println(s.getRemoteSocketAddress().toString());
+               //System.out.println(s.getLocalSocketAddress().toString());
                OutputStream out = s.getOutputStream();
                InputStream in = s.getInputStream();
                DataInputStream is = new DataInputStream(s.getInputStream());
@@ -79,7 +79,7 @@ public class PlaneServer extends Thread{
                //processMess
                s.close();
                processMessage(mesg);
-               System.out.println(object.toString());
+               //System.out.println(object.toString());
              //  boolean r = true;
                int inputCount = 0;
              //  byte inputLine[] = new byte[256];
@@ -172,7 +172,7 @@ public class PlaneServer extends Thread{
     //Sending a message to the requested plane
     public void sendMessage(Message o,int to){
         try {
-            plane.printMessage("Sending to "+Integer.toString(to));
+            //plane.printMessage("Sending to "+Integer.toString(to));
             Socket mySocket = new Socket();
             //InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName("h"+Integer.toString(to)), 1000+to);
             InetSocketAddress targetAddress = new InetSocketAddress(InetAddress.getByName(plane.getIP(to)), 1000+to);
@@ -203,7 +203,12 @@ public class PlaneServer extends Thread{
         this.GUI.toFront();
         this.GUI.setLocationRelativeTo(null);
         this.GUI.animate();
-        plane.printMessage("Enter a number to exit runway");
+        if(plane.landed) {
+            plane.printMessage("Enter a number to take off");
+        }
+        else{
+            plane.printMessage("Enter a number to exit runway");
+        }
         int n = reader.nextInt();
 
          this.exitRunway();
@@ -213,7 +218,12 @@ public class PlaneServer extends Thread{
     //Leaving critical section
     public void exitRunway(){
 
-        plane.landed=true;
+        if(plane.landed){
+            plane.landed=false;
+        }
+        else{
+            plane.landed=true;
+        }
         plane.using=false;
     }
 
