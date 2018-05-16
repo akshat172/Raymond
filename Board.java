@@ -15,47 +15,53 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class Board extends JPanel implements Runnable {
 
     private final int INITIAL_X = 0;
     private final int INITIAL_Y = 0;
     private final int DELAY = 5;
+    private int PlaneID;
 
     private Image plane;
+    private Image background;
     private int x, y;
     private Thread animator;
     
-    JButton play = new JButton("PLAY ");
-    JButton exit = new JButton("EXIT");
+    private JScrollPane jScrollPanel;
+	private JTextArea textArea;
 
-    public Board() {
+    public Board(int ID) {
     	
     	setDoubleBuffered(true);
     	loadImage();
     	
-        play.addActionListener(new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-        	  start();
-          }
-        });
-
-        this.add(play);
+    	PlaneID = ID;
+    	
+    	textArea = new JTextArea(5,10);
+		
+		jScrollPanel = new JScrollPane(textArea);
+		
+		this.add(jScrollPanel);
     }
 
 
     private void loadImage() {
 
-        ImageIcon ii = new ImageIcon("src/resources/rocketship.gif");
+        ImageIcon ii = new ImageIcon("src/resources/plane.jpg");
         plane = ii.getImage();
+        
+        ImageIcon bg = new ImageIcon("src/resources/runway.jpg");
+        background = bg.getImage();
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        g.drawImage(background, 0, 0, null);
         drawStar(g);
     }
     
@@ -95,6 +101,8 @@ public class Board extends JPanel implements Runnable {
         beforeTime = System.currentTimeMillis();
         
         int finished = 0;
+        
+        textArea.append("Plane " + PlaneID + " is landing!");
 
         while (finished == 0) {
 
