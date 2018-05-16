@@ -1,0 +1,22 @@
+Readme
+
+Structure of config files
+-Initial holders
+A  line "a,b" where represents an initial holder state  where b is the holder for a 
+-ip config
+A  line "a,b" where says that   b is the ip address for node a  
+-Connection config
+A  line "a,b" represents a directed edge between a and b
+
+Node command arguements
+own id, starting node with token,ipconfig file, connection config file
+
+Startup:
+
+Assumptions:
+    -All information in config files are correct
+    -All config files are the same for each node
+    -No duplicate nodes are run
+
+1. Run each node with the proper configuration
+2. Enter the proper inputs when prompted 
